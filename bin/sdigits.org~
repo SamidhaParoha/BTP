@@ -1,0 +1,7 @@
+"SDIGITS.org"
+q000 1 - | n1=inp q001;
+q001 2 n1>9 | sum1=0 q002 !n1>9| outp=n1 q004;
+q002 2 n1>0 | tsum1=n1%10,tn1=n1/10 q003 !n1>0 | n1=sum1 q001;
+q003 1 - | sum1=sum1+tsum1,n1=tn1 q002;
+q004 0;
+

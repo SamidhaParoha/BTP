@@ -1,0 +1,8 @@
+"LarPallin.org"
+q00 1 - | n=N q01 ;
+q01 1 - | i=n-1,temp=n-1 q02 ;
+q02 2 temp>0 | orig=i,reverse=0 q03 !temp>0 | - q0e ;
+q03 2 orig>0 | tempR=reverse*10,tempO=orig%10 q04 !orig>0 | temp=i-1 q05 ;
+q04 1 - | reverse=tempR+tempO,orig=orig/10 q03 ;
+q05 2 i==reverse | out1=i q0e !i==reverse | i=temp q02 ;
+q0e 0 ;

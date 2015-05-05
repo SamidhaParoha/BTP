@@ -1,0 +1,9 @@
+"BARCODE.schd"
+q000 1 - | - q001 ;
+q001 1 - | p=inp ;
+q002 1 - | k=2*p q003 ;
+q003 1 - | sum=0,t=k+1 q004 ;
+q004 2 k<10 | - q005 !k<10 | - q006 ;
+q005 1 - | k=t,sum=sum+t,t=t+1 q004 ;
+q006 1 - | outp=sum q001 ;
+

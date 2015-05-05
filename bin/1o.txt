@@ -1,0 +1,3 @@
+(error "line 3 column 23: invalid declaration, constant 'orig' (with the given signature) already declared")
+(error "line 4 column 15: invalid constant declaration, symbol expected")
+(error "line 5 column 106: unexpected character")

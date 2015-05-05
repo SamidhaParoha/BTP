@@ -1,0 +1,4 @@
+(declare-const p Int)
+(declare-const S Int)
+(assert (not (=> (= ÓDB(+ 0 (* 1 S )))(= (+ 0 (* 1 p ))(+ 0 (* 1 S ))))))
+(check-sat)

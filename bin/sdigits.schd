@@ -1,0 +1,6 @@
+"SDIGITS1.schd"
+q000 1 - | P=inp q001;
+q001 2 P>9 | S=0 q002 !P>9 | outp=P q004;
+q002 3 !P>0&&S>9 | P=S,S=0 q002 !P>0&&!S>9 | P=S,outp=P q004 P>0 | M=P%10,T=P/10 q003;
+q003 1 - | S=S+M,P=T q002;
+q004 0;

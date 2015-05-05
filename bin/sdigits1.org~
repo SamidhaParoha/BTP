@@ -1,0 +1,7 @@
+"SDIGITS1.org"
+q000 1 - | n=inp q001;
+q001 2 n>9 | s=0 q002 !n>9| outp=n q004;
+q002 2 n>0 | m=n%10,t=n/10 q003 !n>0 | n=s q001;
+q003 1 - | s=s+m,n=t q002;
+q004 0;
+

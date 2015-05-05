@@ -1,0 +1,6 @@
+"SIMULATION1.org"
+q000 1 - | p1=inp q001 ;
+q001 1 - | k1=2*p1 q002 ;
+q002 2 k1<10 | - q003 !k1<10 | outp=sum1 q004 ;
+q003 0 ;
+q004 0 ;

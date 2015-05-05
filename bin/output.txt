@@ -1,0 +1,132 @@
+
+Calling Parser....
+File opening: barcode.org
+"BARCODE.org"
+q000 1 - | - q001 ;
+q001 1 - | p=inp  q002 ;
+q002 1 - |  k=2*p  q003 ;
+q003 1 - |  sum=0  q004 ;
+q004 2 k<10 | - q005 !k<10 | - q007 ;
+q005 1 - | k=k+1 q006 ;
+q006 1 - | sum=sum+k q004 ;
+q007 1 - | outp=sum q001 ;
+
+Calling Parser....
+File opening: barcode.schd
+"BARCODE.schd"
+q000 1 - | - q001 ;
+q001 1 - | p=inp q002 ;
+q002 1 - | k=2*p q003 ;
+q003 1 - | sum=0,t=k+1 q004 ;
+q004 2 k<10 | - q005 !k<10 | - q006 ;
+q005 1 - | k=t,sum=sum+t,t=t+1 q004 ;
+q006 1 - | outp=sum q001 ;
+
+
+
+
+
+###################### Verification Report #######################
+
+
+ M0 ("BARCODE.org") is Contained in M1 ("BARCODE.schd") 
+
+ No. of states in M0: 8, and No. of states in M1: 7
+
+ No. of paths in the path cover of M0: 3, and No. of paths in the path cover of M1: 3
+
+ Maximum depth of recursion: 0
+
+ Maximum mismatch between two value vectors: 0
+
+ List of corresponding states: 
+	1. ( q000, q000 )		2. ( q004, q004 )	
+
+ List of C-corresponding states: 
+
+
+
+ List of unconditionally equivalent (U-equivalent) paths: 
+
+
+1)
+Path of M0:
+q000 --> q001 --> q002 --> q003 --> q004
+
+ p := 0 + 1 * inp 
+ k := 0 + 2 * inp 
+ sum := 0 
+Propagated Vector
+ Condition: 
+	 True
+
+	 is equivalent to
+Path of M1:
+q000 --> q001 --> q002 --> q003 --> q004
+
+ p := 0 + 1 * inp 
+ k := 0 + 2 * inp 
+ sum := 0 
+ t := 1 + 2 * inp 
+Propagated Vector
+ Condition: 
+	 True
+
+
+2)
+Path of M0:
+q004 --> q007 --> q001 --> q002 --> q003 --> q004
+ ( -10 + 1 * k >= 0 ) 
+ outp := 0 + 1 * sum 
+ p := 0 + 1 * inp 
+ k := 0 + 2 * inp 
+ sum := 0 
+Propagated Vector
+ Condition: 
+	 True
+
+	 is equivalent to
+Path of M1:
+q004 --> q006 --> q001 --> q002 --> q003 --> q004
+ ( -10 + 1 * k >= 0 ) 
+ outp := 0 + 1 * sum 
+ p := 0 + 1 * inp 
+ k := 0 + 2 * inp 
+ sum := 0 
+ t := 1 + 2 * inp 
+Propagated Vector
+ Condition: 
+	 True
+
+
+3)
+Path of M0:
+q004 --> q005 --> q006 --> q004
+ ( -10 + 1 * k < 0 ) 
+ k := 1 + 1 * k 
+ sum := 1 + 1 * k + 1 * sum 
+Propagated Vector
+ Condition: 
+	 True
+
+	 is equivalent to
+Path of M1:
+q004 --> q005 --> q004
+ ( -10 + 1 * k < 0 ) 
+ k := 0 + 1 * t 
+ sum := 0 + 1 * t + 1 * sum 
+ t := 1 + 1 * t 
+Propagated Vector
+ Condition: 
+	 True
+
+
+ List of conditionally equivalent (C-equivalent) paths: 
+
+ User CPU time used: 0 sec and 0 microsecs
+
+ System CPU time used: 0 sec and 0 microsecs
+
+
+####################################################################
+

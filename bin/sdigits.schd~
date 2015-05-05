@@ -1,0 +1,7 @@
+"SDIGITS.schd"
+q000 1 - | n2=inp q001;
+q001 2 n2>9 | sum2=0 q002 !n>9 | outp=n2 q004;
+q002 3 !n2>0&&sum2>9 | n2=sum2,sum2=0 q002 !n2>0&&!sum2>9 | n2=sum2,outp=n2 q004 n2>0 | tsum2=n2%10,tn2=n2/10 q003;
+q003 1 - | sum2=sum+tsum2,n2=tn2 q002;
+q004 0;
+

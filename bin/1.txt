@@ -1,0 +1,6 @@
+(declare-const temp Int)
+(declare-const orig Int)
+(declare-const orig Int)
+(declare-const ( /  0  + 1  Int)
+(assert (not (=> (= (+ 0 (* 1 t e m p ))(+ 0 (* 1 o r i g )))(= (+ 0 (* 1 o r i g ))(+ 0 (* 1 (+ / 0 (* 1 , o r i g 1 0 ))))))))
+(check-sat)

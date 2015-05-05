@@ -1,0 +1,7 @@
+(declare-const k Int)
+(declare-const K Int)
+(declare-const T Int)
+(declare-const s Int)
+(declare-const S Int)
+(assert (not (=> (and (= (+ 0 (* 1 k ))(+ 0 (* 1 K )))(= (+ 1 (* 1 k ))(+ 0 (* 1 T )))) (= (+ 0 (* 1 s ))(= (+ 0 (* 1 S )))))
+(check-sat)

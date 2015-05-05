@@ -1,0 +1,6 @@
+"SIMULATION1.schd"
+q000 1 - | p2=inp q001 ;
+q001 1 - | k2=2*p2 q002 ;
+q002 2 k2<10 | outp=sum2 q003 !k2<10 | outp=sum2 q004 ;
+q003 0 ;
+q004 0 ;

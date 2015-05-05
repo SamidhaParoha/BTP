@@ -1,0 +1,1894 @@
+#include <stdio.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <string.h>
+#include <stdlib.h>
+#include "header.h"
+#include "parser.h"
+#include "valPropHeader.h"
+typedef struct fgt
+{
+int x;
+int y;
+}a;
+typedef struct str sr;
+		struct str
+		{
+		int x;
+		int y;
+		};
+		sr s2[10];
+typedef struct str1 tab1;
+		struct str1
+		{
+			int x;//source
+			int y[5];//target
+			int ch;
+		};
+FSMD *M0, *M1;
+extern void callParser( char* );
+boolean flagVar_List;
+///////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////
+int res(int x, int y,SMT_TAB entries[10])
+{
+	int i=0;
+	for(i=0;i<10;i++)
+	{
+		if(entries[i].state_id1==x&&entries[i].state_id2==y)
+		{
+			return 0;
+		}
+		
+	}
+	return 1;
+}
+void insert_element(int *front,int *rear,int x1, int y1, a s[10])
+{
+	if((*front)==0&&(*rear)==9)
+		printf("\n queue overflow occurs");
+	else if((*front)==-1&&(*rear)==-1)
+		{
+			*front=0;
+			*rear=0;
+			s[(*rear)].x=x1;
+			s[(*rear)].y=y1;
+		}
+	else if((*rear)==9&&(*front)!=0)
+		{
+			(*rear)=0;
+			s[(*rear)].x=x1;
+			s[(*rear)].y=y1;
+		}
+	else
+		{
+			(*rear)++;
+			s[(*rear)].x=x1;
+			s[(*rear)].y=y1;
+		}
+}
+ 
+ 
+ a delete_element(int *front, int *rear, a s[10])
+ {
+   a element;
+		if((*front)==-1)
+ 		 {
+      			element.x = -999;
+      			element.y=-999;
+      			return element;
+ 		 }
+  element.x=s[(*front)].x;
+  element.y=s[(*front)].y;
+  if((*front)==(*rear))
+     	(*front)=(*rear)=-1;
+  else
+  {
+    if((*front)==9)
+      	       (*front)=0;
+    else
+      		(*front)++;
+       		//printf("\n The deleted element is: %d\t %d",element.x,element.y);
+       		
+  }
+ return element;
+}	
+/* This module creates an extra node when necessary (in case of DLS).
+Input: FSMD which we need to modify and state_id of state to which new node has to be created.
+Output: Modified FSMD with an extra node created */
+void createnode(FSMD *M0,int i)
+{
+   printf("\n state_id is %s",M0->states[i].state_id);
+   printf("\n numtrans is %d",M0->states[i].numtrans);
+   TRANSITION_ST  *temp;
+   temp=M0->states[i].translist;
+   write_lists(temp->condition);
+   printf("\n");
+   char *a1,*a2;
+   int l,s;
+   char *m1,*m2,*m3,*m4,*m5,*m6,*condition;
+   a1=(char*)malloc(100);
+   m1=(char*)malloc(100);
+   m2=(char*)malloc(100);
+   m3=(char*)malloc(100);
+   m4=(char*)malloc(100);
+   m5=(char*)malloc(100);
+   m6=(char*)malloc(100);
+   condition=(char*)malloc(100);
+   NC *p8;
+   while(temp!=NULL)
+   {
+     memset(condition,0,sizeof(condition));
+     condition=write_lists1(temp->condition,condition);
+     char *str1;
+     str1=strstr(condition,"AND");
+     if(str1!=NULL)
+     {
+	a1=strtok(condition,"AND");
+	if(strchr(a1,'=')!=NULL)
+	{
+	  if(strchr(a1,'<')!=NULL)
+          {
+            m4=">";
+            strcat(m1,"!");//!
+            m2=strtok(a1,"+");
+            m2++;
+            m2++;
+            if(strchr(m2,'-')!=NULL)
+            {
+	       m2++;
+	       m3=strtok(NULL,"*");
+	       m5=strtok(NULL,"<");
+	       strcat(m1,m5);//n1
+	       strcat(m1,m4);//>
+	       strcat(m1,m2);//10
+	    }
+	    else
+	    {
+	       m3=strtok(NULL,"*");
+	       m5=strtok(NULL,"<");
+	       strcat(m1,m5);//n1
+	       strcat(m1,m4);//>
+	       if(strchr(m2,'0')!=NULL)
+	          strcat(m1,m2);
+               else
+	       {	
+		  strcat(m1,"-");
+		  strcat(m1,m2);//10
+		}
+	     }	
+	     printf("\n modified condition is %s",m1);
+             l=0;
+             s=0;
+	     memset(m6,0,sizeof(m6));
+             while(m1[l]!='\0')
+             {
+		if(m1[l]!=' ')
+	              m6[s++]=m1[l];
+		l++;
+	     }
+	     printf("\n modified condition after removing spaces is %s\n",m6);
+	     p8=parsecondition(m6,p8);
+	     printf("\n modified condition is");
+	     write_lists(p8);	
+             printf("\n");
+           }//if(strchr(condition,'<')!=NULL)
+	   else
+           {
+              m4="<";
+              strcat(m1,"!");//!
+              m2=strtok(a1,"+");
+              m2++;
+              m2++;
+              if(strchr(m2,'-')!=NULL)
+              {
+		 m2++;
+		 printf("\n hii2");
+		 m3=strtok(NULL,"*");
+		 m5=strtok(NULL,">");
+		 strcat(m1,m5);//n1
+		 strcat(m1,m4);//>
+		 strcat(m1,m2);//10
+	       }
+	       else
+	       {
+		 m3=strtok(NULL,"*");
+		 m5=strtok(NULL,">");
+		 strcat(m1,m5);//n1
+		 strcat(m1,m4);//>	
+		 if(strchr(m2,'0')!=NULL)
+		    strcat(m1,m2);
+		 else
+		 {												
+		    strcat(m1,"-");
+		    strcat(m1,m2);//10
+		 }
+		}
+		l=0;
+        	s=0;
+		memset(m6,0,sizeof(m6));
+        	while(m1[l]!='\0')
+        	{
+		   if(m1[l]!=' ')
+		          m6[s++]=m1[l];
+		   l++;
+	        }
+		p8=parsecondition(m6,p8);
+	        printf("\n");
+               }//outer else
+	      }//if(strchr(a1,'=')!=NULL)
+	      else
+	      {
+                printf("\n condition without = symbol is %s",condition);
+        	a1=strtok(condition,"AND");
+        	if(strchr(a1,'<')!=NULL)
+        	{
+        	   m4="<";
+        	   strcat(m1,"!");//!
+        	   m2=strtok(a1,"+");
+        	   m2++;
+        	   m2++;
+        	   if(strchr(m2,'-')!=NULL)
+        	   {
+                      m2++;
+		      m3=strtok(NULL,"*");
+		      m5=strtok(NULL,">");
+		      strcat(m1,m5);//n1
+		      strcat(m1,m4);//>
+		      strcat(m1,m2);//10
+		   }
+		   else
+		   {
+		     printf("\n hii2");
+		     m3=strtok(NULL,"*");
+		     m5=strtok(NULL,">");
+		     strcat(m1,m5);//n1
+		     strcat(m1,m4);//>	
+		     if(strchr(m2,'0')!=NULL)
+			 strcat(m1,m2);
+		     else
+		     {	
+			strcat(m1,"-");
+			strcat(m1,m2);//10
+		     }
+		    }
+		    l=0;
+		    s=0;
+                    memset(m6,0,sizeof(m6));
+        	    while(m1[l]!='\0')
+        	    {
+		      if(m1[l]!=' ')
+			  m6[s++]=m1[l];
+		      l++;
+		    }
+		    printf("\n modified condition after removing spaces is %s\n",m6);
+		    p8=parsecondition(m6,p8);
+		    printf("\n modified condition is");
+		    write_lists(p8);	
+        	    printf("\n");
+        	  }//if(strchr(condition,'<')!=NULL)
+        	  else
+        	  {
+        	    m4=">";
+        	    strcat(m1,"!");//!
+                    m2=strtok(a1,"+");
+        	    m2++;
+        	    m2++;
+        	    if(strchr(m2,'-')!=NULL)
+        	    {
+		      m2++;
+		      printf("\n hii2");
+		      m3=strtok(NULL,"*");
+		      m5=strtok(NULL,">");
+		      strcat(m1,m5);//n1
+		      strcat(m1,m4);//>
+		      strcat(m1,m2);//10
+		    }
+		    else
+		    {
+		       printf("\n hii2");
+		       m3=strtok(NULL,"*");
+		       m5=strtok(NULL,">");
+		       strcat(m1,m5);//n1
+		       strcat(m1,m4);//>	
+		       if(strchr(m2,'0')!=NULL)
+			  strcat(m1,m2);
+		      else
+		      {	
+	                strcat(m1,"-");
+			strcat(m1,m2);//10
+		      }
+		    }
+		    l=0;
+        	    s=0;
+		    memset(m6,0,sizeof(m6));
+        	    while(m1[l]!='\0')
+        	    {
+		      if(m1[l]!=' ')
+	                 m6[s++]=m1[l];
+		      l++;
+		    }
+		    printf("\n modified condition after removing spaces is %s\n",m6);
+		    p8=parsecondition(m6,p8);
+		    printf("\n modified condition is");
+		    write_lists(p8);	
+        	    printf("\n");
+        	  }//outer else
+        	 }//outer else
+		 break;
+	       }//if(str1!=NULL)
+	       temp=temp->next;
+	     }//while
+	        int n0,j;
+		char name[100]="\0",name1[10];
+		strcat(name,"q00");
+		sprintf(name1,"%d",M0->numstates);
+		strcat(name,name1);
+		printf("\n name is %s",name);
+		n0=create_state(name,M0,M0->numstates);
+		printf("\n newly created state is %d",n0);			    					
+		M0->numstates++;
+		strcpy(M0->states[M0->numstates-1].state_id,name);
+		M0->states[M0->numstates-1].numtrans=2;
+		printf("\n newly created state is %s",M0->states[M0->numstates-1].state_id);
+		printf("\n number of states is %d\n",M0->numstates);
+		printf("\n newly created state is %s\n",M0->states[M0->numstates-1].state_id);
+		M0->states[M0->numstates-1].node_type=4;
+		printf("\n node_type is %d",M0->states[M0->numstates-1].node_type);
+		//printf("\n node_type of newly created state is %d",M1->states[M1->numstates-1].node_type);
+		TRANSITION_ST * trans1,* trans2, *trans3,*temp3;
+		trans1=(TRANSITION_ST *) malloc (sizeof(TRANSITION_ST));
+		trans3=(TRANSITION_ST *) malloc (sizeof(TRANSITION_ST));
+		//temp3=(TRANSITION_ST *) malloc (sizeof(TRANSITION_ST));
+		temp3=M0->states[i].translist;
+		printf("\n om1");int count=0;
+		while(temp3->next!=NULL)
+		     temp3=temp3->next;
+		trans1->outtrans=n0;
+	        trans1->condition=p8;
+		trans1->action[0].lhs=0;
+		trans1->action[0].rhs=NULL;
+		trans1->next=NULL;
+		temp3->next=trans1;
+		temp3=M0->states[i].translist;
+		temp3=temp3->next;
+		M0->states[M0->numstates-1].translist=(TRANSITION_ST *) malloc (sizeof(TRANSITION_ST));
+		trans2=M0->states[M0->numstates-1].translist;
+		trans2->outtrans=temp3->outtrans;
+		trans2->next=trans3;
+		temp3=temp3->next;
+		trans2->next->outtrans=temp3->outtrans;
+		TRANSITION_ST * tem;
+		temp3=M0->states[i].translist;
+		temp3=temp3->next;
+		tem=M0->states[M0->numstates-1].translist;
+		tem->action[0]=temp3->action[0];
+		tem->action[1]=temp3->action[1];
+		temp3=temp3->next;
+		tem=tem->next;
+		tem->action[0]=temp3->action[0];
+		tem->action[1]=temp3->action[1];
+		char * condition1,*str1;
+		temp3=M0 ->states[i].translist;
+		tem=M0->states[M0->numstates-1].translist;
+		M0->states[M0->numstates-1].numtrans=2;
+		while(temp3!=NULL)
+		{		
+		   memset(condition,0,sizeof(condition));
+		   memset(m1,0,sizeof(m1));
+        	   condition = write_lists1(temp3->condition,condition);
+        	   str1=strstr(condition,"AND");
+        	   if(str1!=NULL)
+        	   {
+        	      printf("\n condition is %s",condition);
+        	      condition1=strtok(condition,"AND");
+        	      condition1=strtok(NULL,"AND");
+        	      if(strchr(condition1,'=')!=NULL)
+        	      {
+        		 if(strchr(condition1,'<')!=NULL)
+        		 {
+        		    m4=">";
+        		    strcat(m1,"!");//!
+        		    m2=strtok(condition1,"+");
+			    printf("\n here m is%s",m2);
+        		    m2++;
+        		    m2++;
+			    if(strchr(m2,'-')!=NULL)
+			    {
+			      m2++;
+			      m2++;
+			      m2++;
+			      //printf("\n m2 is %s",m2);
+			      printf("\n hii2");
+			      m3=strtok(NULL,"*");
+			      m5=strtok(NULL,"<");
+			      strcat(m1,m5);//n1
+			      strcat(m1,m4);//>
+			      strcat(m1,m2);//10
+			    }
+			    else
+			    {
+			       m3=strtok(NULL,"*");
+			       m5=strtok(NULL,"<");
+			       strcat(m1,m5);//n1
+			       strcat(m1,m4);//>
+			       if(strchr(m2,'0')!=NULL)
+				    strcat(m1,m2);
+			       else
+			       {	
+				  strcat(m1,"-");
+				  strcat(m1,m2);//10
+			       }
+			     }
+			     //printf("\n modified condition is %s",m1);
+        		     l=0;
+        	             s=0;
+			     memset(m6,0,sizeof(m6));
+        		     while(m1[l]!='\0')
+        		     {
+				if(m1[l]!=' ')
+				  m6[s++]=m1[l];
+			        l++;
+			     }
+			     printf("\n modified condition after removing spaces is %s\n",m6);
+			     p8=parsecondition(m6,p8);
+			     printf("\n modified condition is");
+			     write_lists(p8);	
+        		     printf("\n");
+        		   }//if(strchr(condition,'<')!=NULL)
+        		   else
+                           {
+        	              m4="<";
+        		      strcat(m1,"!");//!
+        		      m2=strtok(condition1,"+");
+        		      m2++;
+        		      m2++;
+        		      if(strchr(m2,'-')!=NULL)
+        		      {
+			         m2++;
+				 m2++;
+				 printf("\n hii2");
+				 m3=strtok(NULL,"*");
+				 m5=strtok(NULL,">");
+				 strcat(m1,m5);//n1
+				 strcat(m1,m4);//>
+				 strcat(m1,m2);//10
+			       }
+			       else
+			       {
+				  printf("\n hii2");
+				  m3=strtok(NULL,"*");
+				  m5=strtok(NULL,">");
+				  strcat(m1,m5);//n1
+				  strcat(m1,m4);//>	
+				  if(strchr(m2,'0')!=NULL)
+				     strcat(m1,m2);
+				  else
+				  {	
+				     strcat(m1,"-");
+				     strcat(m1,m2);//10
+				  }
+			        }
+			        l=0;
+        		        s=0;
+				memset(m6,0,sizeof(m6));
+        			while(m1[l]!='\0')
+        			{
+				   if(m1[l]!=' ')
+				      m6[s++]=m1[l];
+				   l++;
+				}
+				p8=parsecondition(m6,p8);
+				printf("\n");
+        		      }//outer else
+        		    }//if(strchr(condition,'=')!=NULL)
+        		    else
+        		    {
+        		       printf("\n condition without = symbol is %s",condition1);
+        		       if(strchr(condition1,'<')!=NULL)
+        		       {
+        			  m4="<";
+        			  m2=strtok(condition1,"+");
+        			  m2++;
+        			  m2++;
+        			  if(strchr(m2,'-')!=NULL)
+        			  {
+				     m2++;
+				     m2++;
+				     printf("\n hii2");
+				     m3=strtok(NULL,"*");
+				     m5=strtok(NULL,">");
+				     strcat(m1,m5);//n1
+				     strcat(m1,m4);//>
+				     strcat(m1,m2);//10
+				   }
+				   else
+				   {
+				     printf("\n hii2");
+				     m3=strtok(NULL,"*");
+				     m5=strtok(NULL,">");
+				     strcat(m1,m5);//n1
+				     strcat(m1,m4);//>	
+				     if(strchr(m2,'0')!=NULL)
+				         strcat(m1,m2);
+				     else
+				     {	
+					strcat(m1,"-");
+					strcat(m1,m2);//10
+				     }
+				   }
+				   l=0;
+        			   s=0;
+				   memset(m6,0,sizeof(m6));
+        			   while(m1[l]!='\0')
+        			   {
+				     if(m1[l]!=' ')
+					m6[s++]=m1[l];
+				     l++;
+				   }
+				}//if(strchr(condition,'<')!=NULL)
+        			else
+        			{
+        			  m4=">";
+        			  //strcat(m1,"!");//!
+        			  m2=strtok(condition1,"+");
+        			  printf("\n here m2 is %s",m2);
+        			  m2++;
+        		          m2++;
+        			  printf("\n here again  m2 is %s",m2);
+        			  if(strchr(m2,'-')!=NULL)
+        			  {
+                                    m2++;
+				    m2++;
+				    m2++;
+				    printf("\n m2 is%s",m2);
+				    printf("\n hii2");
+				    m3=strtok(NULL,"*");
+				    m5=strtok(NULL,">");
+				    strcat(m1,m5);//n1
+				    printf("\n m1 is %s",m1);
+				    strcat(m1,m4);//>
+				    printf("\n m1 is %s",m1);
+				    strcat(m1,m2);//10
+				    printf("\n m1 is %s",m1);
+				  }
+				  else
+                                  {
+		                    printf("\n hii2");
+				    m3=strtok(NULL,"*");
+				    m5=strtok(NULL,">");
+				    strcat(m1,m5);//n1
+				    strcat(m1,m4);//>	
+				    if(strchr(m2,'0')!=NULL)
+				      strcat(m1,m2);
+				    else
+			            {	
+				      strcat(m1,"-");
+				      strcat(m1,m2);//10
+				    }
+				  }
+			          l=0;
+        			  s=0;
+        			  while(m1[l]!='\0')
+        			  {
+				    if(m1[l]!=' ')
+				      m6[s++]=m1[l];
+			            l++;
+                                  }
+				  m6[s]='\0';
+				  printf("\n m6 is %s\n",m6);	
+				}//outer else
+        		      }//outer else
+        		      p8=parsecondition(m6,p8);
+			      write_lists(p8);
+			      tem->condition=p8;
+			      tem=tem->next;
+			    }//if(str1!=NULL)
+			    temp3=temp3->next;
+			  }//while*/
+			  temp3=M0->states[i].translist;
+			  printf("\n$$$$$$$$$$$$$$$\n");
+			  while(temp3!=NULL)
+			  {
+			    write_lists(temp3->condition);
+			    printf("\n");
+			    temp3=temp3->next;
+			  }
+			  printf("\n$$$$$$$$$$$$$$$\n");
+			  temp3=M0->states[i].translist;
+			  TRANSITION_ST *temp4;
+			  temp4=temp3;
+			  while(temp3->next!=NULL)
+			    temp3=temp3->next;
+			  temp4->next=temp3;
+			}//createnode
+
+// This module takes as input two FSMDs  and  returns the FSMDs with its states of interest marked.
+void  mark_states_of_interest(FSMD *M0, FSMD *M1, char *inputch, char *outputch)
+{
+   char *sym_value,*str,*str1;
+   int l,s,i,j,k;
+   TRANSITION_ST *temp;
+   NC *p,*p1,*p2,*p3,*p4,*p5,*p6,*p7,*p8;
+   char * condition,*c1,*c2;
+   char *c3,*c4,*c5;
+   condition=(char*)malloc(1000);
+   char op3[20],op,op1[20]="true";
+   op3[0]='\0';
+   op='\0';
+   MEMB m[10];
+   str=(char*)malloc(100*sizeof(char));
+   sym_value = (char * ) malloc( 100*sizeof( char ) );
+   int states1=0,states2=0,branch1=1,branch2=1;
+   p=create_expr(inputch,op,op3);
+   p3=create_expr(op1,op,op3);
+   //making interested of all states as zero.
+   for(i=0;i<M0->numstates;i++)
+   {
+     for(j=0;j<5;j++)
+   	M0->states[i].interested[j]=0;
+   }
+   	
+   for(i=0;i<M1->numstates;i++)
+   {
+     for(j=0;j<5;j++)
+   	M1->states[i].interested[j]=0;
+   }
+   for(i=0;i<M1->numstates;i++)
+   {
+      if(M1->states[i].interested[0]==0)
+   	j=0;
+     else
+        j=1;
+     if(M1->states[i].node_type==0)//initial state.
+   	   M1->states[i].interested[j++]=1;
+     if(M1->states[i].numtrans>1)// branching node.
+   	  M1->states[i].interested[j++]=2;
+     //making states before writing into output as interested.
+     temp=M1->states[i].translist;
+     while(temp!=NULL) 
+     {
+       k=0;
+       while( temp->action[k].rhs != NULL) 
+       {
+	  symbol_for_index( temp->action[k].lhs, sym_value );
+	  if(strcmp(sym_value,outputch)==0)
+	  {
+	      M1->states[i].interested[j++]=4;
+	      p5=temp->action[k].rhs;
+	  }
+	  k++;
+	}
+	temp=temp->next;
+      }
+     //making states after reading from input as interested.
+     temp=M1->states[i].translist;
+     while(temp!=NULL) 
+     {
+        l=0;
+	while( temp->action[l].rhs != NULL)
+	{
+	     if(compare_trees(p,temp->action[l].rhs))
+	     {
+		symbol_for_index(temp->action[l].lhs,sym_value);
+		p2=create_expr(sym_value,op,op3);
+		printf("\n address of p2 is %p",p2);
+	        M1->states[temp->outtrans].interested[0]=3;
+	     }
+	     l++;
+	 }
+	 temp=temp->next;
+       }
+     }
+     for(i=0;i<M0->numstates;i++)
+     {
+       if(M0->states[i].interested[0]==0)
+           j=0;
+       else
+            j=1;
+       if(M0->states[i].node_type==0)//initial state
+   	     M0->states[i].interested[j++]=1;
+       if(M0->states[i].numtrans>1)
+   	     M0->states[i].interested[j++]=2;
+       //making states after writing into output as interested
+       temp=M0->states[i].translist;
+       while(temp!=NULL) 
+       {
+          k=0;
+          while(temp->action[k].rhs != NULL) 
+          {
+	     symbol_for_index(temp->action[k].lhs, sym_value );
+	     if(strcmp(sym_value,outputch)==0)
+	     {
+	        p4=temp->action[k].rhs;
+	        M0->states[i].interested[j++]=4;
+	      }
+	      k++;
+          }
+          temp=temp->next;
+         }
+	//making states after reading from input as interested		
+   	temp=M0->states[i].translist;
+   	while(temp!=NULL) 
+   	{
+	   l=0;
+	   while( temp->action[l].rhs != NULL ) 
+	   {
+	      if(compare_trees(p,temp->action[l].rhs))
+	      {
+		 M0->states[temp->outtrans].interested[0]=3;
+	         symbol_for_index(temp->action[l].lhs,sym_value);
+		 p1=create_expr(sym_value,op,op3);
+	      }
+	      l++;
+            }
+	    temp=temp->next;
+          }
+   	}
+   	/*for(i=0;i<M0->numstates;i++)
+   	{
+   	    for(j=0;j<5;j++)
+   	    {
+   	       if(M0->states[i].interested[j]==2)
+   	       M0->states[i].counter=branch1++;
+   	    }
+   	}
+   	for(i=0;i<M1->numstates;i++)
+   	{
+   	   for(j=0;j<5;j++)
+   	   {
+              if(M1->states[i].interested[j]==2)
+   	      M1->states[i].counter=branch2++;
+   	   }
+   	}*/
+   }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		
+
+int pairingrelatedstates(FSMD *M0,FSMD *M1,SMT_TAB entries[10],char *inputch,char *outputch)
+{
+	a s[10];
+	int front=-1,rear=-1;
+	entries[0].state_id1=0;
+	entries[0].state_id2=0;
+	char op3[20],op,op1[20]="true";
+	op3[0]='\0';
+	op='\0';
+	NC *p1,*p2,*p3,*p4,*p6,*p7;
+	a s1;
+	int l=0;
+	char * condition,*c1,*c2,*condition1,*condition2;
+	condition=(char*)malloc(1000);
+	condition1=(char*)malloc(1000);
+	condition2=(char*)malloc(1000);
+	TRANSITION_ST *temp,*temp1;
+	insert_element(&front,&rear,0,0,s);
+	s1=delete_element(&front,&rear,s);
+	//printf("\n son %d \t %d\n",s1.x,s1.y);
+	p1=create_expr(op1,op,op3);
+	int count=0;
+	char *sym_value;
+	sym_value=(char*)malloc(100);
+	printf("\n trans is %d",M0->states[1].numtrans);
+	
+	p3=create_expr(inputch,op,op3);
+	p4=create_expr(outputch,op,op3);
+	/*****first entry completed ************/
+	l2: while(s1.x!=-999&&s1.y!=-999)
+	{
+	printf("\n inside");	
+	printf("\n %d\t %d", M0->states[s1.x].numtrans, M1->states[s1.y].numtrans);
+	if(M0->states[s1.x].numtrans==0&&M1->states[s1.y].numtrans==0)
+	{	
+		temp=M0->states[s1.x].translist;
+		temp1=M1->states[s1.y].translist;
+		l=0;
+					entries[count].state_id1=s1.x;
+					entries[count].state_id2=s1.y;
+					//M0->states[s1.x].tab=count;
+					//M1->states[s1.y].tab=count;
+					
+					temp=M0->states[(s1.x)-1].translist;
+					temp1=M1->states[(s1.y)-1].translist;
+					while(temp->action[l].rhs!=NULL)
+					{
+							if(compare_trees(p3,temp->action[l].rhs))
+							{
+									symbol_for_index(temp->action[l].lhs,sym_value);
+									
+									p2=create_expr(sym_value,op,op3);
+									
+									(entries[count].member)->term1=p2;
+									
+							}
+							l++;
+					}
+					l=0;
+					while(temp1->action[l].rhs!=NULL)
+					{
+							if(compare_trees(p3,temp1->action[l].rhs))
+							{
+									symbol_for_index(temp1->action[l].lhs,sym_value);
+									p2=create_expr(sym_value,op,op3);
+									(entries[count++].member)->term2=p2;
+									
+							}
+							l++;
+					}
+					break;
+}//if
+
+
+	
+if(M0->states[s1.x].numtrans==1&&M1->states[s1.y].numtrans==1)
+			{
+			printf("\n sowmy");		
+			temp=M0->states[s1.x].translist;
+			temp1=M1->states[s1.y].translist;
+			
+				
+			
+		
+			
+			if(M0->states[temp->outtrans].interested[0]!=0&&M1->states[temp1->outtrans].interested[0]!=0)
+			{
+				if(res(temp->outtrans,temp1->outtrans,entries))
+					insert_element(&front,&rear,temp->outtrans,temp1->outtrans,s);
+			}
+				if(M0->states[s1.x].interested[0]==1&&M1->states[s1.y].interested[0]==1)
+				{
+						entries[count].state_id1=s1.x;
+						entries[count].state_id2=s1.y;
+						//M0->states[s1.x].tab=count;
+						//M1->states[s1.y].tab=count;
+						(entries[count++].member)->term1=p1;
+				}	
+				
+				else if(M0->states[s1.x].interested[0]==3&&M1->states[s1.y].interested[0]==3)
+				{
+					l=0;
+					entries[count].state_id1=s1.x;
+					entries[count].state_id2=s1.y;
+					//M0->states[s1.x].tab=count;
+					//M1->states[s1.y].tab=count;
+					
+					temp=M0->states[(s1.x)-1].translist;
+					temp1=M1->states[(s1.y)-1].translist;
+					
+					
+					write_lists(temp->action[l].rhs);
+					
+
+					
+					while(temp->action[l].rhs!=NULL)
+					{
+							if(compare_trees(p3,temp->action[l].rhs))
+							{
+									symbol_for_index(temp->action[l].lhs,sym_value);
+									
+									p2=create_expr(sym_value,op,op3);
+									
+									(entries[count].member)->term1=p2;
+									
+							}
+							l++;
+					}
+					l=0;
+					while(temp1->action[l].rhs!=NULL)
+					{
+							if(compare_trees(p3,temp1->action[l].rhs))
+							{
+									symbol_for_index(temp1->action[l].lhs,sym_value);
+									p2=create_expr(sym_value,op,op3);
+									(entries[count++].member)->term2=p2;
+									
+							}
+							l++;
+					}
+					
+				}//else if
+				else 
+				{
+					entries[count].state_id1=s1.x;
+					entries[count].state_id2=s1.y;
+					//M0->states[s1.x].tab=count;
+					//M1->states[s1.y].tab=count;
+					l=0;
+					while(temp->action[l].rhs!=NULL)
+					{
+					
+						symbol_for_index(temp->action[l].lhs,sym_value);
+						p2=create_expr(sym_value,op,op3);
+						if(compare_trees(p2,p4))
+						{
+							(entries[count].member)->term1=temp->action[l].rhs;
+							
+						}
+						l++;
+					}
+			
+
+
+
+					l=0;
+					while(temp1->action[l].rhs!=NULL)
+					{
+					
+						symbol_for_index(temp1->action[l].lhs,sym_value);
+						p2=create_expr(sym_value,op,op3);
+						if(compare_trees(p2,p4))
+							{
+							(entries[count++].member)->term2=temp1->action[l].rhs;
+						}
+						l++;
+					}
+					
+				}//else	
+			}//outer if
+			else 
+			{
+				temp=M0->states[s1.x].translist;
+				while(temp!=NULL)
+				{
+						memset(condition1,0,sizeof(condition1));
+						condition1=write_lists1(temp->condition,condition1);
+						printf("\ncondition is %s",condition1);
+						if(strchr(condition1,'=')!=NULL)
+						{
+							temp1=M1->states[s1.y].translist;
+							while(temp1!=NULL)
+							{
+								condition2=write_lists1(temp1->condition,condition2);
+								if(strchr(condition2,'=')!=NULL)
+					
+			{
+										if(M0->states[temp->outtrans].interested[0]!=0&&M1->states[temp1->outtrans].interested[0]!=0)
+										{
+											if(res(temp->outtrans,temp1->outtrans,entries))
+												insert_element(&front,&rear,temp->outtrans,temp1->outtrans,s);
+											break;
+										}
+								}//if(strchr(condition2,'=')!=NULL)	
+								temp1=temp1->next;
+							}//while(temp1!=NULL)
+				
+						}//if(strchr(condition1,'=')!=NULL)
+						else if(strchr(condition1,'=')==NULL)
+						{
+							temp1=M1->states[s1.y].translist;
+							while(temp1!=NULL)
+							{
+								memset(condition2,0,sizeof(condition2));
+								condition2=write_lists1(temp1->condition,condition2);
+								if(strchr(condition2,'=')==NULL)
+								{
+									if(M0->states[temp->outtrans].interested[0]!=0&&M1->states[temp1->outtrans].interested[0]!=0)
+									{
+										//check whether it is in simulation table
+										if(res(temp->outtrans,temp1->outtrans,entries))
+												insert_element(&front,&rear,temp->outtrans,temp1->outtrans,s);
+										break;
+									}
+								}//if(strchr(condition2,'=')!=NULL)	
+								temp1=temp1->next;
+							}//while(temp1!=NULL)
+						}
+			temp=temp->next;
+		}//while(temp!=NULL)
+		entries[count].state_id1=s1.x;
+		entries[count].state_id2=s1.y;
+		//M0->states[s1.x].tab=count;
+		//M1->states[s1.y].tab=count;
+		temp=M0->states[s1.x].translist;
+		memset(condition1,0,sizeof(condition1));
+		condition1=write_lists1(temp->condition,condition1);
+		if(strchr(condition1,'>')!=NULL)
+        				{
+        					c1 = strtok(condition1,">");
+        					c1=strtok(c1,"*");
+        					c1=strtok(NULL, "*");
+        					c1++;
+        					p6=createVariable(c1);
+        					
+        		            		(entries[count].member)->term1=p6;
+						
+					}
+			else
+					{
+						c1 = strtok(condition1,"<");
+        					c1=strtok(c1,"*");
+        					c1=strtok(NULL, "*");
+        					c1++;
+        					
+        					p6=createVariable(c1);
+        					
+        		            		(entries[count].member)->term1=p6;
+        		            	}
+        		            	
+		
+		temp=M1->states[s1.y].translist;
+		memset(condition1,0,sizeof(condition1));
+		condition1=write_lists1(temp->condition,condition1);
+		if(strchr(condition1,'>')!=NULL)
+        				{
+        					c1 = strtok(condition1,">");
+        					c1=strtok(c1,"*");
+        					c1=strtok(NULL, "*");
+        					c1++;
+        					p6=createVariable(c1);
+        					
+        		            		(entries[count++].member)->term2=p6;
+						
+					}
+			else
+					{
+						c1 = strtok(condition1,"<");
+        					c1=strtok(c1,"*");
+        					c1=strtok(NULL, "*");
+        					c1++;
+        					
+        					p6=createVariable(c1);
+        					
+        		            		(entries[count++].member)->term2=p6;
+        		            	}
+        		            	
+		
+	}//else (M0->states[s1.x].numtrans>1)
+	if(M0->states[s1.x].numtrans==1)
+	{
+	temp=M0->states[s1.x].translist;
+	temp1=M1->states[s1.y].translist;
+	if(M0->states[temp->outtrans].interested[0]==0&&M1->states[temp1->outtrans].interested[0]==0)
+				{
+					l3: temp=M0->states[temp->outtrans].translist;
+					
+					temp1=M1->states[temp1->outtrans].translist;
+					
+					if(temp==NULL&&temp1==NULL)
+						break;
+					else if(M0->states[temp->outtrans].interested[0]==0&&M1->states[temp1->outtrans].interested[0]==0)
+					{
+						
+						goto l3;
+					}
+					else
+					{
+						s1.x=temp->outtrans;
+						s1.y=temp1->outtrans;
+						continue;
+					}
+					
+				}
+	}
+	
+	s1=delete_element(&front,&rear,s);
+	printf("\n**************som*********************\n");
+	printf("%d\t%d",s1.x,s1.y);
+	printf("\n**************som*********************");
+}//while(s1.x!=-999&&s1.y!=-999)
+return count;
+}		
+int srch(SMT_TAB entries[10], int x, int y, int count)
+{
+	int i;
+	for(i=0;i<count;i++)
+	{
+		if(entries[i].state_id1==x && entries[i].state_id2==y)
+			break;
+	}
+	return i;
+}		
+		
+void push(TRANSITION_ST *arr[10], TRANSITION_ST *temp, int *top)
+{
+	if(*top==10)
+		return;
+	else
+	{
+		//printf("\n mmmmmmmmmmmmmmmmmmmm\n");		
+		//printf("\n%d\t",temp->action[0].lhs);
+		//write_lists(temp->action[0].rhs);
+		//printf("\n mmmmmmmmmmmmmmmmmmmm\n");
+		arr[++(*top)]=temp;
+		
+	}
+}
+
+TRANSITION_ST* pop(TRANSITION_ST *arr[10],int *top)
+{
+	if(*top==-1)
+		return NULL;
+	TRANSITION_ST* tm;
+	tm=arr[(*top)];
+	//write_lists(tm->action[0].rhs);
+	return(arr[(*top)--]);
+}
+ char s[50];
+    int top3= -1;
+    char* i2p(char[]);
+
+    void push1(char data)
+    {
+    s[++top3] = data;
+    }
+
+    char pop1()
+    {
+    return s[top3--];
+    }
+
+    int stack_empty()
+    {
+    if(top3 == -1)
+    return 1;
+    else
+    return 0;
+    }
+
+    int precstack(char elem)
+    {
+    switch(elem)
+    {
+    case ')':
+    return 1;
+    case '+':
+    case '-':
+    return 3;
+    case '*':
+    case '/':
+    return 5;
+    case '^':
+    return 7;
+    }
+    }
+
+    int precinput(char elem)
+    {
+    switch(elem)
+    {
+    case '(':
+    return 1;
+    case '+':
+    case '-':
+    return 4;
+    case '*':
+    case '/':
+    return 6;
+    case '^':
+    return 8;
+    }
+    }
+
+    void strreverse(char s[])
+    {
+    int i, len = 0;
+    char temp;
+    int tlen=0;
+    tlen = strlen(s);
+    len = tlen-1;
+    for(i = 0; i < tlen/2; i++){
+    temp = s[i];
+    s[i] = s[len];
+    s[len--] = temp;
+    }
+    }
+char* modified(char cond[100])
+{
+int len;
+char cond1[100];
+char *cond2;
+cond2=(char*)malloc(1000);
+
+len=strlen(cond);
+int i=0,j=0;
+while(cond[i]!='\0')
+{
+if(cond[i]!=' ')
+cond1[j++]=cond[i];
+i++;
+}
+cond2=i2p(cond1);
+return cond2;
+}
+ char *i2p(char infx[])
+    {
+    char *prfx, ch, elem;
+    prfx=(char*)malloc(100);
+    int i = 0, k = 0;
+    strreverse(infx);
+    while((ch=infx[i++]) != '\0')
+    {
+    if( ch == ')') push1(ch);
+    else if(isalnum(ch))
+    prfx[k++]=ch;
+    else if( ch == '(')
+    {
+    while( s[top3] != ')')
+    prfx[k++]=pop1();
+    elem=pop1();
+    }
+    else
+    {
+    while(stack_empty() != 1)
+    {
+    if(precinput(ch) <= precstack(s[top3]))
+    prfx[k++]=pop1();
+    else
+    break;
+    }
+    push1(ch);
+    }
+    }
+    while( stack_empty() != 1)
+    prfx[k++]=pop1();
+    prfx[k]='\0';
+    strreverse(prfx);
+    strreverse(infx);
+printf("\n string is %s",prfx);
+return prfx;
+
+}
+
+void check(int x, int y, SMT_TAB entries[10], SMT_TAB entries1[10],int count,int ch)
+{
+	int k,l,m,n;
+	int top=-1,top1=-1;
+	TRANSITION_ST *temp,*temp1,*temp2;
+	TRANSITION_ST *arr[10];
+	TRANSITION_ST *arr1[10];
+	k=entries[x].state_id1;
+	l=entries[x].state_id2;
+	m=entries[y].state_id1;
+	n=entries[y].state_id2;
+	printf("\n %d\t%d\t%d\t%d",k,l,m,n);
+	char *condition1;
+	condition1=(char*)malloc(1000);
+	if(M0->states[k].numtrans==1)
+	{
+		temp=M0->states[k].translist;
+		push(arr, temp, &top);
+		while(temp->outtrans!=m)
+		{
+			temp=M0->states[temp->outtrans].translist;
+			push(arr, temp, &top);
+		}
+	}
+	if(M1->states[l].numtrans==1)
+	{
+		temp1=M1->states[l].translist;
+		push(arr1, temp1,&top1);
+		while(temp1->outtrans!=n)
+		{
+			temp1=M1->states[temp1->outtrans].translist;
+			push(arr1, temp1,&top1);
+		}
+	}
+	
+	if(M0->states[k].numtrans==2)
+	{
+		if(ch==1)
+		{
+			temp=M0->states[k].translist;
+			memset(condition1,0,sizeof(condition1));
+			condition1=write_lists1(temp->condition,condition1);
+			if(strchr(condition1,'=')!=NULL)
+			{
+				temp=temp->next;
+			}
+			push(arr, temp ,&top);
+			while(temp->outtrans!=m)
+			{
+				temp=M0->states[temp->outtrans].translist;
+				push(arr,temp ,&top);
+			}
+			temp1=M1->states[l].translist;
+			memset(condition1,0,sizeof(condition1));
+			condition1=write_lists1(temp1->condition,condition1);
+			if(strchr(condition1,'=')!=NULL)
+			{
+				temp1=temp1->next;
+			}
+			push(arr1, temp1,&top1);
+			while(temp1->outtrans!=n)
+			{
+				temp1=M1->states[temp1->outtrans].translist;
+				push(arr1,temp1,&top1);
+			}
+		}//outer if
+		else
+		{
+			temp=M0->states[k].translist;
+			memset(condition1,0,sizeof(condition1));
+			condition1=write_lists1(temp->condition,condition1);
+			if(strchr(condition1,'=')==NULL)
+				temp=temp->next;
+			push(arr,temp,&top);
+			while(temp->outtrans!=m)
+			{
+				temp=M0->states[temp->outtrans].translist;
+				push(arr,temp ,&top);
+			}
+			temp1=M1->states[l].translist;
+			memset(condition1,0,sizeof(condition1));
+			condition1=write_lists1(temp1->condition,condition1);
+			if(strchr(condition1,'=')==NULL)
+				temp1=temp1->next;
+			push(arr1,temp1,&top1);
+			while(temp1->outtrans!=n)
+			{
+				temp1=M1->states[temp1->outtrans].translist;
+				push(arr1,temp1 ,&top1);
+			}
+		}//outer else
+
+	}//if numtrans=2*/
+	/*********************************pushing into stack is over ********************************************************/
+/*************************popping transitions **************************************************/
+int c=0;NC *p1;
+MEMB *p;
+char *sym_value1;
+sym_value1=(char*)malloc(1000);
+
+while((temp=pop(arr,&top))!=NULL)
+{
+c=0;
+while(temp->action[c].rhs!=NULL)
+	c++;
+c=c-1;
+while(c>=0)
+{
+	p=entries1[y].member;
+	while(p!=NULL)
+	{
+		memset(sym_value1,0,sizeof(sym_value1));
+		symbol_for_index(temp->action[c].lhs,sym_value1);
+		printf("\n sym_value1 is %s\n",sym_value1);
+		p1=createVariable(sym_value1);
+		
+		
+		if(compare_trees(p1,p->term1))
+			p->term1=temp->action[c].rhs;
+		p=p->next;
+	}
+	c--;
+}
+}
+c=0;
+while((temp=pop(arr1,&top1))!=NULL)
+{
+c=0;
+while(temp->action[c].rhs!=NULL)
+	c++;
+c=c-1;
+while(c>=0)
+{
+	p=entries1[y].member;
+	while(p!=NULL)
+	{
+		memset(sym_value1,0,sizeof(sym_value1));
+		symbol_for_index(temp->action[c].lhs,sym_value1);
+		printf("\n sym_value1 is %s\n",sym_value1);
+		p1=createVariable(sym_value1);
+		if(compare_trees(p1,p->term2))
+			p->term2=temp->action[c].rhs;
+		p=p->next;
+	}
+	c--;
+}
+}
+
+if(x==0)
+{
+	if(compare_trees((entries1[y].member)->term1,(entries1[y].member)->term2))
+		{
+		printf("\n there is no need to strengthen the condition at %s %s",M0->states[k].state_id, M1->states[l].state_id);
+		(entries1[y].member)->term1=(entries[y].member)->term1;
+		(entries1[y].member)->term2=(entries[y].member)->term2;
+		return 0;
+		}
+}
+
+else 
+{
+char *cond1,*cond11;
+char *cond2,*cond22;
+cond1=(char*)malloc(1000);
+cond2=(char*)malloc(1000);
+cond11=(char*)malloc(1000);
+cond22=(char*)malloc(1000);
+memset(cond1,0,sizeof(cond1));
+memset(cond2,0,sizeof(cond2));
+memset(cond11,0,sizeof(cond11));
+memset(cond22,0,sizeof(cond22));
+char *c1,*c2,*c3,*c4;
+c1=(char*)malloc(50);
+c2=(char*)malloc(50);
+printf("\n mmmmmmm");
+cond1=write_lists1((entries[x].member)->term1,cond1);
+strcpy(c1,cond1);printf("\n c1 is %s",c1);
+strtok(c1,"*");
+c3=strtok(NULL,"*");
+printf("\n c3 is%s",c3);
+cond1=modified(cond1);
+printf("\n cond1 is %s",cond1);
+char *cond3;
+char *cond4;
+cond3=(char*)malloc(100);
+cond4=(char*)malloc(100);
+int i2=0,i3=0;
+while(cond1[i2]!='\0')
+{
+	cond3[i3++]=cond1[i2++];
+	cond3[i3++]=' ';
+}
+printf("\n cond3 is %s",cond3);
+i2=0;i3=0;
+int cnt=0;
+while(cond3[i2]!='\0')
+{
+	if(cond3[i2]=='+'||cond3[i2]=='*')
+	{
+		cond4[i3++]='(';
+		cond4[i3++]=cond3[i2++];
+		++cnt;
+	}
+	else
+	{
+		cond4[i3++]=cond3[i2++];
+	}
+}
+while(cnt!=0)
+{
+cond4[i3++]=')';
+cnt--;
+}
+printf("\n cond4 is %s",cond4);	
+
+
+cond2=write_lists1((entries[x].member)->term2,cond2);
+strcpy(c2,cond2);printf("\n c2 is %s",c2);
+strtok(c2,"*");
+c4=strtok(NULL,"*");
+printf("\n c4 is%s",c4);
+cond2=modified(cond2);
+printf("\n cond2 is %s",cond2);
+char *cond5;
+char *cond6;
+cond5=(char*)malloc(100);
+cond6=(char*)malloc(100);
+i2=0,i3=0;
+while(cond2[i2]!='\0')
+{
+	cond5[i3++]=cond2[i2++];
+	cond5[i3++]=' ';
+}
+printf("\n cond5 is %s",cond5);
+i2=0;i3=0;
+cnt=0;
+while(cond5[i2]!='\0')
+{
+	if(cond5[i2]=='+'||cond5[i2]=='*')
+	{
+		cond6[i3++]='(';
+		cond6[i3++]=cond5[i2++];
+		++cnt;
+	}
+	else
+	{
+		cond6[i3++]=cond5[i2++];
+	}
+}
+while(cnt!=0)
+{
+cond6[i3++]=')';
+cnt--;
+}
+printf("\n cond6is %s",cond6);	
+
+
+cond11=write_lists1((entries1[y].member)->term1,cond11);
+
+cond11=modified(cond11);
+printf("\n cond11 is %s",cond11);
+char *cond7;
+char *cond8;
+cond7=(char*)malloc(100);
+cond8=(char*)malloc(100);
+i2=0,i3=0;
+while(cond11[i2]!='\0')
+{
+	cond7[i3++]=cond11[i2++];
+	cond7[i3++]=' ';
+}
+printf("\n cond7 is %s",cond7);
+i2=0;i3=0;
+cnt=0;
+while(cond7[i2]!='\0')
+{
+	if(cond7[i2]=='+'||cond7[i2]=='*')
+	{
+		cond8[i3++]='(';
+		cond8[i3++]=cond7[i2++];
+		++cnt;
+	}
+	else
+	{
+		cond8[i3++]=cond7[i2++];
+	}
+}
+while(cnt!=0)
+{
+cond8[i3++]=')';
+cnt--;
+}
+printf("\n cond8is %s",cond8);	
+
+cond22=write_lists1((entries1[y].member)->term2,cond22);
+char *c5,*c6;
+c5=(char*)malloc(100);
+strcpy(c5,cond22);
+strtok(c5,"*");
+c6=strtok(NULL,"*");
+cond22=modified(cond22);
+printf("\n cond22 is %s",cond22);
+char *cond9;
+char *cond10;
+cond9=(char*)malloc(100);
+cond10=(char*)malloc(100);
+i2=0,i3=0;
+while(cond22[i2]!='\0')
+{
+	cond9[i3++]=cond22[i2++];
+	cond9[i3++]=' ';
+}
+printf("\n cond9 is %s",cond9);
+i2=0;i3=0;
+cnt=0;
+while(cond9[i2]!='\0')
+{
+	if(cond9[i2]=='+'||cond9[i2]=='*')
+	{
+		cond10[i3++]='(';
+		cond10[i3++]=cond9[i2++];
+		++cnt;
+	}
+	else
+	{
+		cond10[i3++]=cond9[i2++];
+	}
+}
+while(cnt!=0)
+{
+cond10[i3++]=')';
+cnt--;
+}
+printf("\n cond10 is %s",cond10);	
+/**************************FILE WRITING *************************************/
+FILE *fp;
+char str1[50];
+fp=fopen("1.txt","w");
+fprintf(fp,"(declare-const");
+fprintf(fp,"%s Int)",c3);
+fprintf(fp,"\n");
+fprintf(fp,"(declare-const");
+fprintf(fp,"%s Int)",c4);
+fprintf(fp,"\n");
+fprintf(fp,"(assert(=> (= ");
+fprintf(fp,"%s%s)(= ",cond4,cond6);
+fprintf(fp,"%s%s)))",cond8,cond10);
+fprintf(fp,"\n");
+fprintf(fp,"(check-sat)");
+fclose(fp);
+char cmd[1000];
+strcpy(cmd,"/home/omsairam/Desktop/another/bin/z3 -smt2 ");
+strcat(cmd,"1.txt");
+strcat(cmd," > ");
+		strcat(cmd,"1o.txt");
+		system(cmd);
+FILE *fp1;
+fp1=fopen("1o.txt","r");
+fscanf(fp1,"%s",str1);
+fclose(fp1);
+printf("\n str1 is %s",str1);
+if(strcmp(str1,"sat")==0)
+{
+	printf("\n no need to strengthen the condition at %s %s",M0->states[k].state_id, M1->states[l].state_id);
+	(entries1[y].member)->term1=(entries[y].member)->term1;
+	(entries1[y].member)->term2=(entries[y].member)->term2;
+	return 0;
+}
+else
+{
+	((entries[x].member)->next)->term1=(entries1[y].member)->term1;
+	((entries[x].member)->next)->term2=(entries1[y].member)->term2;
+	(entries1[y].member)->term1=(entries[y].member)->term1;
+	(entries1[y].member)->term2=(entries[y].member)->term2;
+	((entries1[x].member)->next)->term1=(entries1[y].member)->term1;
+	((entries1[x].member)->next)->term2=(entries1[y].member)->term2;
+	return 1;
+	
+
+}
+}//else
+
+}//check
+
+void findingsrf(FSMD *M0, FSMD *M1, SMT_TAB entries[10], tab1 pair[10], char *inputch, char *outputch, int count)
+		{
+			
+			int i,k,l,a1,a2;
+			TRANSITION_ST *temp, *temp1, *temp3, *temp4;
+			char *condition1, *condition2;
+			condition1=(char*)malloc(1000);
+			condition2=(char*)malloc(1000);
+			for(i=0;i<count;i++)
+				pair[i].x=i;printf("\n mmmmmmmmmmmmmm\n");
+			for(i=0;i<count;i++)
+			{
+				k=entries[pair[i].x].state_id1;
+				l=entries[pair[i].x].state_id2;
+				s1:  if(M0->states[k].numtrans==0&&M1->states[l].numtrans==0)
+					{
+						pair[i].y[0]=-99;
+						continue;
+					}
+				if(M0->states[k].numtrans==1&&M1->states[l].numtrans==1)
+				{
+					temp=M0->states[k].translist;
+					temp1=M1->states[l].translist;
+					if(M0->states[temp->outtrans].interested[0]!=0&&M1->states[temp1->outtrans].interested[0]!=0)
+						pair[i].y[0]=srch(entries,temp->outtrans,temp1->outtrans,count);
+					else
+					{
+						k=temp->outtrans;
+						l=temp1->outtrans;
+						goto s1;
+					}
+				}//outer if
+				else
+				{
+				temp=M0->states[k].translist;
+				temp1=M1->states[l].translist;
+				int n=0;
+				while(temp!=NULL)
+				{
+						memset(condition1,0,sizeof(condition1));
+						condition1=write_lists1(temp->condition,condition1);printf("\n hiiii");
+						printf("\ncondition is %s",condition1);
+						if(strchr(condition1,'=')!=NULL)
+						{
+							temp1=M1->states[l].translist;
+							while(temp1!=NULL)
+							{
+							memset(condition2,0,sizeof(condition2));								
+								condition2=write_lists1(temp1->condition,condition2);
+								if(strchr(condition2,'=')!=NULL)
+								{
+									temp3=temp;temp4=temp1; 
+									s5:if(M0->states[temp3->outtrans].interested[0]!=0)
+										{
+											a1=temp3->outtrans;
+											
+										}
+									else
+									{
+										temp3=M0->states[temp3->outtrans].translist;
+										if(temp3==NULL)
+											break;
+										
+										goto s5;
+									}
+									s6: if(M1->states[temp4->outtrans].interested[0]!=0)
+										{
+											a2=temp4->outtrans;
+										}
+									else
+									{
+										temp4=M0->states[temp4->outtrans].translist;
+										if(temp4==NULL)
+											break;
+										
+										goto s6;	
+										
+									}
+								pair[i].y[n++]=srch(entries,a1,a2,count);
+								pair[i].ch=0;
+
+								}//if
+							temp1=temp1->next;
+							}//while
+						}//outer if
+						else
+						{
+						 temp1=M1->states[l].translist;
+							while(temp1!=NULL)
+							{
+							memset(condition2,0,sizeof(condition2));														
+								condition2=write_lists1(temp1->condition,condition2);
+								if(strchr(condition2,'=')==NULL)
+								{
+										temp3=temp;temp4=temp1;
+										s3:if(M0->states[temp3->outtrans].interested[0]!=0)	
+										{
+											a1=temp3->outtrans;
+											
+										}
+									else
+									{
+										temp3=M0->states[temp3->outtrans].translist;
+										if(temp3==NULL)
+											break;
+										
+										goto s3;
+									}
+									s4: if(M1->states[temp4->outtrans].interested[0]!=0)
+										{
+											a2=temp4->outtrans;
+										}
+									else
+									{
+										temp4=M0->states[temp4->outtrans].translist;
+										if(temp4==NULL)
+											break;
+										
+										goto s4;	
+										
+									}
+								pair[i].y[n++]=srch(entries,a1,a2,count);
+								pair[i].ch=1;
+								}//if
+							temp1=temp1->next;
+							}//while
+						}//else
+						if(temp==NULL)
+							break;
+						temp=temp->next;
+				}//outerwhile
+				}//outer else
+
+											
+			}//for loop
+/**************************************pairing completed ********************************************************/
+i=0;
+int result,tar;
+for(i=0;i<count;i++)
+{
+if(pair[i].y[0]==-99)
+	continue;
+else if(pair[i].y[0]!=-99 && pair[i].y[1]==-99)
+{
+	result=check(pair[i].x, pair[i].y[0],entries,count,pair[i].ch);
+	if(result==0)
+		continue;
+	else
+	{
+		a3:tar=srch1(pair,count,pair[i].x,pair[i].ch);
+		result=check(tar,pair[i].x,entries,count,pair[i].ch);
+		if(result==0)
+			continue;
+		else
+		{
+			pair[i].x=tar;
+			goto a3;
+		}
+	}
+}
+					
+else 
+{
+	result=check(pair[i].x,pair[i].y[0],entries,count);
+	result=check(pair[i].x,pair[i].y[1],entries,count);
+							
+}			
+}//for loop
+		}//findingsrf
+
+
+
+
+		
+		
+		
+/***************************************findingsrf2*********************************************************************/
+
+
+		
+
+int main( int argc, char* argv[] )
+{
+   
+   char inputch[100],outputch[100];//inputch is input channel and outputch is output channel
+   if(argc != 3)
+   {
+       printf("\nInadequate number of parameters provided\nExiting System\n");
+       return 0;
+   }
+   // reads FSMD M0 from text file and intialises data structures needed for it.
+   callParser(argv[1]); 
+   // reads FSMD M1 from text file and intialises data structures needed for it.
+   callParser(argv[2]); 
+   printf("\n enter the input channel?");
+   scanf("%s",inputch);
+   printf("\n enter the outputchannel?");
+   scanf("%s",outputch);
+  /*module marks the state of interest for states : This module takes input as two FSMD's  and  
+  * returns the FSMDs with its states of interest marked*/
+  mark_states_of_interest(M0,M1,inputch,outputch);
+  for(i=0;i<M0->numstates;i++)
+  {
+     if(M0->states[i].numtrans>2)
+     {
+        // This module takes input one FSMD and state_id of state to which we have to create new node. 
+        createnode(M0,i);
+        // after creating newnode again marking states of interest for modified FSMD.
+        mark_states_of_interest(M0,M1,inputch,outputch);
+        break;
+      }
+  }
+  for(i=0;i<M1->numstates;i++)
+  {
+    if(M1->states[i].numtrans>2)
+    {		
+	// This module takes input one FSMD and state_id of state to which we have to create new node.
+	createnode(M1,i);
+	// after creating newnode again marking states of interest for modified FSMD.
+	mark_states_of_interest(M0,M1,inputch,outputch);
+	
+	break;
+     }
+  }
+  
+  // SMT_TAB is structure for simulation table entry. entries is  an array of simulation table entries . 
+  SMT_TAB entries[10],entries1[10];
+  //tab1 is a data structure for storing source and target entries.
+  tab1 pair[10];
+  int n,i,j,count;
+  //MEMB is a data structure for storing the state relating formula for simulation table entry.
+  MEMB m[10],m1[10],m2[10],m3[10],m4[10];
+  for(i=0;i<10;i++)
+     entries[i].member=&m[i];/*allocating memory for member */
+  for(i=0;i<10;i++)
+  {
+    (entries[i].member)->next=&m1[i];
+    (entries[i].member)->next=NULL;
+  }
+  for(i=0;i<10;i++)
+      entries1[i].member=&m3[i];
+  for(i=0;i<10;i++)
+  {
+     (entries1[i].member)->next=&m4[i];
+     (entries1[i].member)->next=NULL;
+   }
+   for(i=0;i<10;i++)
+   {
+      //state_id1 is for state_id of first state in simulation table entry.
+      entries[i].state_id1=-10;
+      //state_id2 is for state_id of second state in simulation table entry.
+      entries[i].state_id2=-10;
+   }
+   //PAIRING RELATED STATES MODULE .
+   /* Input: Two FSMD's M0, M1 and an array of simulation table entries 
+   Output: An array of simulation table entries intiliased with related state state_ids and initial SRFs and
+    returns the number of entries in the simulation table.*/
+    /*count=pairingrelatedstates(M0,M1,entries,inputch,outputch);
+    printf("\n count is %d",count);
+    for(i=0;i<count;i++)
+    {
+      pair[i].ch=-99; 
+      pair[i].y[1]=-99;//intialises the second target entry for every source as -99
+    }*/
+   /*This modules takes initial simulation table as input perform iterations and then return final simulation table */
+   //findingsrf(M0, M1, entries, pair, inputch, outputch, count);
+   //check(0,1,entries,entries1,count,0);
+
+	
+
+	return 0;
+}
+ 
+
+    
+
